@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/slok/go-http-metrics/metrics"
@@ -60,6 +61,21 @@ func New(cfg Config) Middleware {
 	return m
 }
 
+func fixPath(urlPath string) string {
+	tmpPaths := strings.Split(urlPath, "/")
+	if len(tmpPaths) <= 3 {
+		return urlPath
+	}
+	pathResult := ""
+	for i := 0; i < 3; i++ {
+		pathResult += tmpPaths[i] + "/"
+	}
+	if tmpPaths[3] == "transactions" || tmpPaths[3] == "blocks" {
+		pathResult += "detail"
+	}
+	return pathResult
+}
+
 // Measure abstracts the HTTP handler implementation by only requesting a reporter, this
 // reporter will return the required data to be measured.
 // it accepts a next function that will be called as the wrapped logic before and after
@@ -71,7 +87,7 @@ func (m Middleware) Measure(handlerID string, reporter Reporter, next func()) {
 	// set that ID as the URL path.
 	hid := handlerID
 	if handlerID == "" {
-		hid = reporter.URLPath()
+		hid = fixPath(reporter.URLPath())
 	}
 
 	// Measure inflights if required.
