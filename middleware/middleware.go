@@ -67,10 +67,11 @@ func fixPath(urlPath string) string {
 		return urlPath
 	}
 	pathResult := ""
-	for i := 0; i < 3; i++ {
+	for i := 0; i <= 3; i++ {
 		pathResult += tmpPaths[i] + "/"
 	}
-	if tmpPaths[3] == "transactions" || tmpPaths[3] == "blocks" {
+	if tmpPaths[3] == "transactions" ||
+		tmpPaths[3] == "blocks" || tmpPaths[3] == "accounts" {
 		pathResult += "detail"
 	}
 	return pathResult
