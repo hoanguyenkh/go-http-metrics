@@ -7,6 +7,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -61,23 +62,24 @@ func New(cfg Config) Middleware {
 	return m
 }
 
-func fixPath(urlPath string) string {
+func FixPath(urlPath string) string {
 	tmpPaths := strings.Split(urlPath, "/")
-	if len(tmpPaths) <= 3 {
+	n := len(tmpPaths)
+	if n <= 4 {
 		return urlPath
 	}
 	pathResult := ""
-	for i := 0; i < 3; i++ {
-		pathResult += tmpPaths[i] + "/"
+	for i := 0; i < n; i++ {
+		if regexp.MustCompile(`\d`).MatchString(tmpPaths[i]) && !strings.HasPrefix(tmpPaths[i], "v") {
+			if i == n-1 {
+				pathResult += "detail"
+			}
+		} else {
+			pathResult += tmpPaths[i] + "/"
+		}
 	}
-	pathResult += tmpPaths[3]
-	if len(tmpPaths) == 4 {
-		return pathResult
-	}
-	if tmpPaths[3] == "transactions" ||
-		tmpPaths[3] == "blocks" || tmpPaths[3] == "accounts" {
-		pathResult += "/detail"
-	}
+
+	pathResult = strings.TrimRight(pathResult, "/")
 	return pathResult
 }
 
@@ -92,7 +94,7 @@ func (m Middleware) Measure(handlerID string, reporter Reporter, next func()) {
 	// set that ID as the URL path.
 	hid := handlerID
 	if handlerID == "" {
-		hid = fixPath(reporter.URLPath())
+		hid = FixPath(reporter.URLPath())
 	}
 
 	// Measure inflights if required.
