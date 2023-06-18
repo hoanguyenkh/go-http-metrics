@@ -63,6 +63,24 @@ func New(cfg Config) Middleware {
 }
 
 func FixPath(urlPath string) string {
+	if strings.Contains("urlPath", ".js") {
+		return ""
+	}
+	if strings.Contains("urlPath", ".css") {
+		return ""
+	}
+	if strings.Contains("urlPath", ".png") {
+		return ""
+	}
+	if strings.Contains("urlPath", ".jpg") {
+		return ""
+	}
+	if strings.Contains("urlPath", ".html") {
+		return ""
+	}
+	if strings.Contains("urlPath", ".json") {
+		return ""
+	}
 	tmpPaths := strings.Split(urlPath, "/")
 	n := len(tmpPaths)
 	if n <= 4 {
